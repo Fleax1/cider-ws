@@ -21,7 +21,7 @@
   },
   "build": {
     "appId": "com.ciderws.app",
-    "productName": "Cider WS",
+    "productName": "CiderWS",
     "directories": {
       "output": "dist"
     },

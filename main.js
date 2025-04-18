@@ -128,7 +128,7 @@ function createTray() {
       }
     }
   ]);
-  tray.setToolTip('Cider WS');
+  tray.setToolTip('CiderWS');
   tray.setContextMenu(contextMenu);
 }
 
