@@ -42,17 +42,17 @@ function connectToCider(port) {
     const { type, data } = payload;
 
     if (type === 'playbackStatus.nowPlayingItemDidChange' || type === 'playbackStatus.getCurrentItem' || type === 'playbackStatus.playbackStateDidChange') {
-      if (data && data.attributes) {
+      if (data && (data.attributes || (data.artistName && data.name))) {
         // Remplacer les variables de dimensions dans l'URL
-        let coverUrl = data.attributes.artwork?.url;
+        let coverUrl = data.attributes?.artwork?.url || data.artwork?.url;
         if (coverUrl) {
           coverUrl = coverUrl.replace('{w}', '500').replace('{h}', '500');
         }
         
         currentSong = {
-          artist: data.attributes.artistName || 'Inconnu',
-          song: data.attributes.name || 'Inconnu',
-          album: data.attributes.albumName || 'Inconnu',
+          artist: data.attributes?.artistName || data.artistName || 'Inconnu',
+          song: data.attributes?.name || data.name || 'Inconnu',
+          album: data.attributes?.albumName || data.albumName || 'Inconnu',
           coverUrl: coverUrl || null
         };
 
@@ -63,6 +63,12 @@ function connectToCider(port) {
         }
 
         saveToFile(currentSong);
+      } else if (type === 'playbackStatus.playbackStateDidChange' && data.state === 'stopped') {
+        console.log('⏹️ Lecture arrêtée');
+        currentSong = null;
+        if (mainWindow) {
+          mainWindow.webContents.send('now-playing-update', null);
+        }
       } else {
         console.log('⏸️ Aucune musique en cours de lecture');
         currentSong = null;
