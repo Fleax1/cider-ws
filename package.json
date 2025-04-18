@@ -4,6 +4,7 @@
   "main": "main.js",
   "scripts": {
     "start": "electron .",
+    "build": "electron-builder --win portable",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
@@ -11,11 +12,22 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
-    "cider-ws": "file:",
     "socket.io-client": "^4.8.1",
     "ws": "^8.18.1"
   },
   "devDependencies": {
-    "electron": "^24.0.0"
+    "electron": "^24.0.0",
+    "electron-builder": "^24.9.1"
+  },
+  "build": {
+    "appId": "com.ciderws.app",
+    "productName": "Cider WS",
+    "directories": {
+      "output": "dist"
+    },
+    "win": {
+      "target": "portable",
+      "icon": "icon.png"
+    }
   }
 }
