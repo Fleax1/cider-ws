@@ -80,6 +80,18 @@ function saveToFile(songInfo) {
   const configPath = path.join(__dirname, 'settings.json');
   const config = JSON.parse(fs.readFileSync(configPath, 'utf8'));
   
+  // Remplacer %APPDATA% par le chemin réel
+  let filePath = config.filePath;
+  if (filePath.includes('%APPDATA%')) {
+    filePath = filePath.replace('%APPDATA%', process.env.APPDATA);
+  }
+  
+  // Créer le dossier s'il n'existe pas
+  const dirPath = path.dirname(filePath);
+  if (!fs.existsSync(dirPath)) {
+    fs.mkdirSync(dirPath, { recursive: true });
+  }
+  
   let output;
   if (config.fileFormat === 'json') {
     output = JSON.stringify(songInfo, null, 2);
@@ -91,7 +103,7 @@ function saveToFile(songInfo) {
       .replace('{{COVER}}', songInfo.coverUrl || '');
   }
 
-  fs.writeFileSync(config.filePath, output);
+  fs.writeFileSync(filePath, output);
 }
 
 function createTray() {

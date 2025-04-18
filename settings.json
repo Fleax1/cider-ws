@@ -1,6 +1,6 @@
 {
   "port": 10767,
   "fileFormat": "text",
-  "filePath": "C:\\Users\\Si2P\\Desktop\\now_playing.txt",
+  "filePath": "C:\\CiderWS\\now_playing.txt",
   "fileTemplate": "{{ARTIST}} - {{SONG}} - {{ALBUM}} - {{COVER}}"
 }
