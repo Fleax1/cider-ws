@@ -1,0 +1,21 @@
+{
+  "name": "cider-ws",
+  "version": "1.0.0",
+  "main": "cider-ws.js",
+  "scripts": {
+    "start": "electron .",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "Fleax",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "cider-ws": "file:",
+    "socket.io-client": "^4.8.1",
+    "ws": "^8.18.1"
+  },
+  "devDependencies": {
+    "electron": "^24.0.0"
+  }
+}

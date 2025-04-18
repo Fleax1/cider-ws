@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Paramètres Cider WS</title>
+</head>
+<body>
+  <h1>Configurer Cider WS</h1>
+
+  <label for="port">Port WebSocket :</label>
+  <input type="number" id="port" min="1024" max="65535" required>
+
+  <label for="fileFormat">Format du fichier :</label>
+  <select id="fileFormat">
+    <option value="text">Texte</option>
+    <option value="json">JSON</option>
+  </select>
+
+  <label for="filePath">Chemin du fichier (now_playing.txt) :</label>
+  <input type="text" id="filePath" />
+
+  <label for="fileTemplate">Modèle du format (Utilisez {{ARTIST}}, {{SONG}}, {{ALBUM}}) :</label>
+  <input type="text" id="fileTemplate" placeholder="{{ARTIST}} - {{SONG}}" />
+
+  <button id="saveBtn">Sauvegarder</button>
+
+  <script src="renderer.js"></script>
+</body>
+</html>
