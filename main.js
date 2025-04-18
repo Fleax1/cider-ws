@@ -40,12 +40,19 @@ function connectToCider(port) {
   socket.on('API:Playback', (payload) => {
     const { type, data } = payload;
 
-    if (type === 'playbackStatus.nowPlayingItemDidChange' || type === 'playbackStatus.getCurrentItem') {
-      if (data) {
+    if (type === 'playbackStatus.nowPlayingItemDidChange' || type === 'playbackStatus.getCurrentItem' || type === 'playbackStatus.playbackStateDidChange') {
+      if (data && data.attributes) {
+        // Remplacer les variables de dimensions dans l'URL
+        let coverUrl = data.attributes.artwork?.url;
+        if (coverUrl) {
+          coverUrl = coverUrl.replace('{w}', '500').replace('{h}', '500');
+        }
+        
         currentSong = {
-          artist: data.artistName || 'Inconnu',
-          song: data.name || 'Inconnu',
-          album: data.albumName || 'Inconnu',
+          artist: data.attributes.artistName || 'Inconnu',
+          song: data.attributes.name || 'Inconnu',
+          album: data.attributes.albumName || 'Inconnu',
+          coverUrl: coverUrl || null
         };
 
         console.log('🎵 Musique en cours:', `${currentSong.artist} - ${currentSong.song}`);
@@ -79,7 +86,8 @@ function saveToFile(songInfo) {
     output = config.fileTemplate
       .replace('{{ARTIST}}', songInfo.artist)
       .replace('{{SONG}}', songInfo.song)
-      .replace('{{ALBUM}}', songInfo.album);
+      .replace('{{ALBUM}}', songInfo.album)
+      .replace('{{COVER}}', songInfo.coverUrl || '');
   }
 
   fs.writeFileSync(config.filePath, output);
@@ -92,11 +100,15 @@ function createWindow() {
     x: screen.getPrimaryDisplay().bounds.x,
     y: screen.getPrimaryDisplay().bounds.y,
     show: false,
+    frame: true,
+    autoHideMenuBar: true,
     webPreferences: {
       nodeIntegration: true,
       contextIsolation: false,
     },
   });
+
+  mainWindow.setMenu(null);
 
   mainWindow.loadFile('index.html');
 

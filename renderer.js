@@ -14,9 +14,11 @@ function showStatusMessage(message, type = 'success') {
 
 function updateNowPlaying(songInfo) {
   const currentSongElement = document.getElementById('currentSong');
+  const albumCoverElement = document.querySelector('.album-cover');
   
   if (!songInfo || !songInfo.artist || !songInfo.song) {
     currentSongElement.innerHTML = '<div class="no-song">Aucune musique en cours de lecture</div>';
+    albumCoverElement.innerHTML = '<div class="no-cover">Aucune pochette</div>';
     return;
   }
 
@@ -25,6 +27,12 @@ function updateNowPlaying(songInfo) {
     <div><span>Titre :</span> ${songInfo.song}</div>
     ${songInfo.album ? `<div><span>Album :</span> ${songInfo.album}</div>` : ''}
   `;
+
+  if (songInfo.coverUrl) {
+    albumCoverElement.innerHTML = `<img src="${songInfo.coverUrl}" alt="Pochette de ${songInfo.album || songInfo.song}">`;
+  } else {
+    albumCoverElement.innerHTML = '<div class="no-cover">Aucune pochette disponible</div>';
+  }
 }
 
 // Récupérer la configuration à partir du processus principal

@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Paramètres Cider WS</title>
+  <title>Cider WS</title>
   <style>
     :root {
       --primary-color: #4a90e2;
@@ -103,6 +103,9 @@
       box-shadow: 0 2px 4px rgba(0,0,0,0.1);
       margin-bottom: 30px;
       text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
     }
 
     .now-playing h2 {
@@ -110,9 +113,36 @@
       margin-bottom: 15px;
     }
 
+    .album-cover {
+      width: 200px;
+      height: 200px;
+      border-radius: 8px;
+      margin-bottom: 15px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+      background-color: #f0f0f0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+
+    .album-cover img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .album-cover .no-cover {
+      color: #666;
+      font-style: italic;
+      text-align: center;
+      padding: 20px;
+    }
+
     .song-info {
       font-size: 18px;
       margin-bottom: 10px;
+      width: 100%;
     }
 
     .song-info span {
@@ -130,6 +160,9 @@
 
   <div class="now-playing">
     <h2>Musique en cours</h2>
+    <div class="album-cover">
+      <div class="no-cover">Aucune pochette</div>
+    </div>
     <div id="currentSong" class="song-info">
       <div class="no-song">Aucune musique en cours de lecture</div>
     </div>
@@ -159,7 +192,7 @@
   <div class="form-group">
     <label for="fileTemplate">Modèle de format</label>
     <input type="text" id="fileTemplate" placeholder="{{ARTIST}} - {{SONG}}" />
-    <div class="help-text">Utilisez {{ARTIST}}, {{SONG}}, {{ALBUM}} pour personnaliser le format</div>
+    <div class="help-text">Utilisez {{ARTIST}}, {{SONG}}, {{ALBUM}}, {{COVER}} pour personnaliser le format</div>
   </div>
 
   <button id="saveBtn">Sauvegarder la configuration</button>
