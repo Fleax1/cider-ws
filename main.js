@@ -1,9 +1,10 @@
-const { app, BrowserWindow, ipcMain, screen } = require('electron');
+const { app, BrowserWindow, ipcMain, screen, Tray, Menu } = require('electron');
 const fs = require('fs');
 const path = require('path');
 const io = require('socket.io-client');
 
 let mainWindow;
+let tray = null;
 let currentSong = null;
 
 // Connexion WebSocket à Cider
@@ -93,6 +94,26 @@ function saveToFile(songInfo) {
   fs.writeFileSync(config.filePath, output);
 }
 
+function createTray() {
+  tray = new Tray(path.join(__dirname, 'icon.png'));
+  const contextMenu = Menu.buildFromTemplate([
+    { 
+      label: 'Ouvrir', 
+      click: () => {
+        mainWindow.show();
+      }
+    },
+    { 
+      label: 'Quitter', 
+      click: () => {
+        app.quit();
+      }
+    }
+  ]);
+  tray.setToolTip('Cider WS');
+  tray.setContextMenu(contextMenu);
+}
+
 function createWindow() {
   mainWindow = new BrowserWindow({
     width: 800,
@@ -115,9 +136,18 @@ function createWindow() {
   mainWindow.once('ready-to-show', () => {
     mainWindow.show();
   });
+
+  // Gérer la fermeture de la fenêtre
+  mainWindow.on('close', (event) => {
+    if (!app.isQuitting) {
+      event.preventDefault();
+      mainWindow.hide();
+    }
+  });
 }
 
 app.on('ready', () => {
+  createTray();
   createWindow();
 
   const configPath = path.join(__dirname, 'settings.json');
@@ -129,6 +159,10 @@ app.on('ready', () => {
       console.error('Erreur lors de la lecture de la configuration:', error);
     }
   }
+});
+
+app.on('before-quit', () => {
+  app.isQuitting = true;
 });
 
 app.on('window-all-closed', () => {
