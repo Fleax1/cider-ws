@@ -4,26 +4,166 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Paramètres Cider WS</title>
+  <style>
+    :root {
+      --primary-color: #4a90e2;
+      --secondary-color: #f5f5f5;
+      --text-color: #333;
+      --border-color: #ddd;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+      background-color: var(--secondary-color);
+      color: var(--text-color);
+    }
+
+    h1 {
+      color: var(--primary-color);
+      text-align: center;
+      margin-bottom: 30px;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 500;
+    }
+
+    input, select {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid var(--border-color);
+      border-radius: 4px;
+      font-size: 16px;
+      margin-bottom: 10px;
+    }
+
+    input:focus, select:focus {
+      outline: none;
+      border-color: var(--primary-color);
+      box-shadow: 0 0 0 2px rgba(74, 144, 226, 0.2);
+    }
+
+    button {
+      background-color: var(--primary-color);
+      color: white;
+      padding: 12px 24px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 16px;
+      width: 100%;
+      transition: background-color 0.3s;
+    }
+
+    button:hover {
+      background-color: #357abd;
+    }
+
+    .help-text {
+      font-size: 14px;
+      color: #666;
+      margin-top: 5px;
+    }
+
+    .status-message {
+      text-align: center;
+      padding: 10px;
+      margin-top: 20px;
+      border-radius: 4px;
+      display: none;
+    }
+
+    .success {
+      background-color: #d4edda;
+      color: #155724;
+    }
+
+    .error {
+      background-color: #f8d7da;
+      color: #721c24;
+    }
+
+    .now-playing {
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      margin-bottom: 30px;
+      text-align: center;
+    }
+
+    .now-playing h2 {
+      color: var(--primary-color);
+      margin-bottom: 15px;
+    }
+
+    .song-info {
+      font-size: 18px;
+      margin-bottom: 10px;
+    }
+
+    .song-info span {
+      font-weight: 500;
+    }
+
+    .no-song {
+      color: #666;
+      font-style: italic;
+    }
+  </style>
 </head>
 <body>
-  <h1>Configurer Cider WS</h1>
+  <h1>Cider WS</h1>
 
-  <label for="port">Port WebSocket :</label>
-  <input type="number" id="port" min="1024" max="65535" required>
+  <div class="now-playing">
+    <h2>Musique en cours</h2>
+    <div id="currentSong" class="song-info">
+      <div class="no-song">Aucune musique en cours de lecture</div>
+    </div>
+  </div>
 
-  <label for="fileFormat">Format du fichier :</label>
-  <select id="fileFormat">
-    <option value="text">Texte</option>
-    <option value="json">JSON</option>
-  </select>
+  <div class="form-group">
+    <label for="port">Port WebSocket</label>
+    <input type="number" id="port" min="1024" max="65535" required>
+    <div class="help-text">Port utilisé pour la connexion WebSocket (1024-65535)</div>
+  </div>
 
-  <label for="filePath">Chemin du fichier (now_playing.txt) :</label>
-  <input type="text" id="filePath" />
+  <div class="form-group">
+    <label for="fileFormat">Format du fichier</label>
+    <select id="fileFormat">
+      <option value="text">Texte</option>
+      <option value="json">JSON</option>
+    </select>
+    <div class="help-text">Choisissez le format de sortie pour le fichier</div>
+  </div>
 
-  <label for="fileTemplate">Modèle du format (Utilisez {{ARTIST}}, {{SONG}}, {{ALBUM}}) :</label>
-  <input type="text" id="fileTemplate" placeholder="{{ARTIST}} - {{SONG}}" />
+  <div class="form-group">
+    <label for="filePath">Chemin du fichier</label>
+    <input type="text" id="filePath" placeholder="now_playing.txt" />
+    <div class="help-text">Chemin où sera sauvegardé le fichier</div>
+  </div>
 
-  <button id="saveBtn">Sauvegarder</button>
+  <div class="form-group">
+    <label for="fileTemplate">Modèle de format</label>
+    <input type="text" id="fileTemplate" placeholder="{{ARTIST}} - {{SONG}}" />
+    <div class="help-text">Utilisez {{ARTIST}}, {{SONG}}, {{ALBUM}} pour personnaliser le format</div>
+  </div>
+
+  <button id="saveBtn">Sauvegarder la configuration</button>
+  <div id="statusMessage" class="status-message"></div>
 
   <script src="renderer.js"></script>
 </body>

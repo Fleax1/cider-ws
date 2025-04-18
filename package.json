@@ -1,7 +1,7 @@
 {
   "name": "cider-ws",
   "version": "1.0.0",
-  "main": "cider-ws.js",
+  "main": "main.js",
   "scripts": {
     "start": "electron .",
     "test": "echo \"Error: no test specified\" && exit 1"
