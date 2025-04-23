@@ -118,8 +118,8 @@ window.addEventListener('DOMContentLoaded', () => {
       config.filePath = document.getElementById('filePath').value;
       config.fileTemplate = document.getElementById('fileTemplate').value;
       
-      if (!config.filePath) {
-        showStatusMessage('Le chemin du fichier est requis', 'error');
+      if (!config.filePath || !config.fileTemplate) {
+        showStatusMessage('Le chemin du fichier et le modèle sont requis', 'error');
         return;
       }
     }
@@ -129,20 +129,17 @@ window.addEventListener('DOMContentLoaded', () => {
     saveBtn.disabled = true;
     saveBtn.textContent = 'Sauvegarde en cours...';
 
-    // Envoyer la configuration au processus principal pour la sauvegarder
-    ipcRenderer.invoke('save-config', config)
-      .then((message) => {
-        showStatusMessage('Configuration sauvegardée avec succès !');
-      })
-      .catch(error => {
-        showStatusMessage('Erreur lors de la sauvegarde', 'error');
-        console.error('Erreur:', error);
-      })
-      .finally(() => {
-        // Réactiver le bouton
-        saveBtn.disabled = false;
-        saveBtn.textContent = 'Sauvegarder la configuration';
-      });
+    // Envoyer la configuration au processus principal
+    ipcRenderer.invoke('save-config', config).then(() => {
+      showStatusMessage('Configuration sauvegardée avec succès');
+    }).catch(error => {
+      showStatusMessage('Erreur lors de la sauvegarde de la configuration', 'error');
+      console.error('Erreur:', error);
+    }).finally(() => {
+      // Réactiver le bouton
+      saveBtn.disabled = false;
+      saveBtn.textContent = 'Sauvegarder la configuration';
+    });
   });
 
   // Écouter les mises à jour de la musique en cours

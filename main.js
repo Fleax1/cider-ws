@@ -6,6 +6,7 @@ const io = require('socket.io-client');
 let mainWindow;
 let tray = null;
 let currentSong = null;
+let socket;
 
 // Connexion WebSocket à Cider
 function connectToCider(port) {
@@ -202,7 +203,7 @@ app.on('ready', () => {
   if (fs.existsSync(configPath)) {
     try {
       const config = JSON.parse(fs.readFileSync(configPath, 'utf8'));
-      connectToCider(config.port);
+      socket = connectToCider(config.port);
     } catch (error) {
       console.error('Erreur lors de la lecture de la configuration:', error);
     }
@@ -258,6 +259,11 @@ ipcMain.handle('get-config', () => {
 ipcMain.handle('save-config', (event, config) => {
   const configPath = path.join(__dirname, 'settings.json');
   fs.writeFileSync(configPath, JSON.stringify(config, null, 2));
+  
+  // Redémarrer la connexion WebSocket avec la nouvelle configuration
+  if (socket) {
+    socket.disconnect();
+  }
   connectToCider(config.port);
   return 'Configuration sauvegardée !';
 });
