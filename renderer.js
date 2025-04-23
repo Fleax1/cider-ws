@@ -43,6 +43,45 @@ window.addEventListener('DOMContentLoaded', () => {
     document.getElementById('fileFormat').value = config.fileFormat;
     document.getElementById('filePath').value = config.filePath;
     document.getElementById('fileTemplate').value = config.fileTemplate || '{{ARTIST}} - {{SONG}}';
+    
+    // Gérer la case à cocher des fichiers séparés
+    const separateFilesCheckbox = document.getElementById('separateFiles');
+    const separateFilesContainer = document.getElementById('separateFilesContainer');
+    const singleFileContainer = document.getElementById('singleFileContainer');
+    
+    if (config.separateFiles) {
+      separateFilesCheckbox.checked = true;
+      separateFilesContainer.style.display = 'block';
+      singleFileContainer.style.display = 'none';
+      document.getElementById('artistFilePath').value = config.artistFilePath || 'artist.txt';
+      document.getElementById('songFilePath').value = config.songFilePath || 'song.txt';
+      document.getElementById('albumFilePath').value = config.albumFilePath || 'album.txt';
+      document.getElementById('coverFilePath').value = config.coverFilePath || 'cover.txt';
+    }
+
+    separateFilesCheckbox.addEventListener('change', () => {
+      if (separateFilesCheckbox.checked) {
+        separateFilesContainer.style.display = 'block';
+        singleFileContainer.style.display = 'none';
+        
+        // Remplir les champs avec les chemins par défaut s'ils sont vides
+        if (!document.getElementById('artistFilePath').value) {
+          document.getElementById('artistFilePath').value = 'C:\\CiderWS\\artist.txt';
+        }
+        if (!document.getElementById('songFilePath').value) {
+          document.getElementById('songFilePath').value = 'C:\\CiderWS\\song.txt';
+        }
+        if (!document.getElementById('albumFilePath').value) {
+          document.getElementById('albumFilePath').value = 'C:\\CiderWS\\album.txt';
+        }
+        if (!document.getElementById('coverFilePath').value) {
+          document.getElementById('coverFilePath').value = 'C:\\CiderWS\\cover.txt';
+        }
+      } else {
+        separateFilesContainer.style.display = 'none';
+        singleFileContainer.style.display = 'block';
+      }
+    });
   }).catch(error => {
     showStatusMessage('Erreur lors du chargement de la configuration', 'error');
     console.error('Erreur:', error);
@@ -51,25 +90,39 @@ window.addEventListener('DOMContentLoaded', () => {
   // Sauvegarder la configuration lorsque l'utilisateur clique sur le bouton
   document.getElementById('saveBtn').addEventListener('click', () => {
     const port = document.getElementById('port').value;
-    const filePath = document.getElementById('filePath').value;
+    const separateFiles = document.getElementById('separateFiles').checked;
     
     // Validation des champs
     if (!port || port < 1024 || port > 65535) {
       showStatusMessage('Le port doit être compris entre 1024 et 65535', 'error');
       return;
     }
-    
-    if (!filePath) {
-      showStatusMessage('Le chemin du fichier est requis', 'error');
-      return;
-    }
 
     const config = {
       port: parseInt(port),
       fileFormat: document.getElementById('fileFormat').value,
-      filePath: filePath,
-      fileTemplate: document.getElementById('fileTemplate').value,
+      separateFiles: separateFiles,
     };
+
+    if (separateFiles) {
+      config.artistFilePath = document.getElementById('artistFilePath').value;
+      config.songFilePath = document.getElementById('songFilePath').value;
+      config.albumFilePath = document.getElementById('albumFilePath').value;
+      config.coverFilePath = document.getElementById('coverFilePath').value;
+      
+      if (!config.artistFilePath || !config.songFilePath || !config.albumFilePath || !config.coverFilePath) {
+        showStatusMessage('Tous les chemins de fichiers sont requis', 'error');
+        return;
+      }
+    } else {
+      config.filePath = document.getElementById('filePath').value;
+      config.fileTemplate = document.getElementById('fileTemplate').value;
+      
+      if (!config.filePath) {
+        showStatusMessage('Le chemin du fichier est requis', 'error');
+        return;
+      }
+    }
 
     // Désactiver le bouton pendant la sauvegarde
     const saveBtn = document.getElementById('saveBtn');

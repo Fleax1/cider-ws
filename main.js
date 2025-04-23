@@ -86,30 +86,60 @@ function saveToFile(songInfo) {
   const configPath = path.join(__dirname, 'settings.json');
   const config = JSON.parse(fs.readFileSync(configPath, 'utf8'));
   
-  // Remplacer %APPDATA% par le chemin réel
-  let filePath = config.filePath;
-  if (filePath.includes('%APPDATA%')) {
-    filePath = filePath.replace('%APPDATA%', process.env.APPDATA);
+  // Créer le dossier C:\CiderWS s'il n'existe pas
+  const ciderWSPath = 'C:\\CiderWS';
+  if (!fs.existsSync(ciderWSPath)) {
+    fs.mkdirSync(ciderWSPath, { recursive: true });
   }
   
-  // Créer le dossier s'il n'existe pas
-  const dirPath = path.dirname(filePath);
-  if (!fs.existsSync(dirPath)) {
-    fs.mkdirSync(dirPath, { recursive: true });
-  }
-  
-  let output;
-  if (config.fileFormat === 'json') {
-    output = JSON.stringify(songInfo, null, 2);
-  } else {
-    output = config.fileTemplate
-      .replace('{{ARTIST}}', songInfo.artist)
-      .replace('{{SONG}}', songInfo.song)
-      .replace('{{ALBUM}}', songInfo.album)
-      .replace('{{COVER}}', songInfo.coverUrl || '');
-  }
+  if (config.separateFiles) {
+    // Sauvegarder dans des fichiers séparés
+    const files = [
+      { path: config.artistFilePath, content: songInfo.artist },
+      { path: config.songFilePath, content: songInfo.song },
+      { path: config.albumFilePath, content: songInfo.album },
+      { path: config.coverFilePath, content: songInfo.coverUrl || '' }
+    ];
 
-  fs.writeFileSync(filePath, output);
+    files.forEach(({ path: filePath, content }) => {
+      // Remplacer %APPDATA% par le chemin réel
+      if (filePath.includes('%APPDATA%')) {
+        filePath = filePath.replace('%APPDATA%', process.env.APPDATA);
+      }
+      
+      // Créer le dossier s'il n'existe pas
+      const dirPath = path.dirname(filePath);
+      if (!fs.existsSync(dirPath)) {
+        fs.mkdirSync(dirPath, { recursive: true });
+      }
+      
+      fs.writeFileSync(filePath, content);
+    });
+  } else {
+    // Sauvegarder dans un seul fichier (comportement original)
+    let filePath = config.filePath;
+    if (filePath.includes('%APPDATA%')) {
+      filePath = filePath.replace('%APPDATA%', process.env.APPDATA);
+    }
+    
+    const dirPath = path.dirname(filePath);
+    if (!fs.existsSync(dirPath)) {
+      fs.mkdirSync(dirPath, { recursive: true });
+    }
+    
+    let output;
+    if (config.fileFormat === 'json') {
+      output = JSON.stringify(songInfo, null, 2);
+    } else {
+      output = config.fileTemplate
+        .replace('{{ARTIST}}', songInfo.artist)
+        .replace('{{SONG}}', songInfo.song)
+        .replace('{{ALBUM}}', songInfo.album)
+        .replace('{{COVER}}', songInfo.coverUrl || '');
+    }
+
+    fs.writeFileSync(filePath, output);
+  }
 }
 
 function createTray() {
@@ -195,26 +225,33 @@ ipcMain.handle('get-current-song', () => {
 
 ipcMain.handle('get-config', () => {
   const configPath = path.join(__dirname, 'settings.json');
+  const defaultConfig = {
+    port: 10767,
+    fileFormat: 'text',
+    filePath: 'C:\\CiderWS\\now_playing.txt',
+    fileTemplate: '{{ARTIST}} - {{SONG}}',
+    separateFiles: false,
+    artistFilePath: 'C:\\CiderWS\\artist.txt',
+    songFilePath: 'C:\\CiderWS\\song.txt',
+    albumFilePath: 'C:\\CiderWS\\album.txt',
+    coverFilePath: 'C:\\CiderWS\\cover.txt'
+  };
+
   try {
     if (fs.existsSync(configPath)) {
       const configData = fs.readFileSync(configPath, 'utf8');
-      return JSON.parse(configData);
+      const config = JSON.parse(configData);
+      
+      // Fusionner avec la configuration par défaut pour s'assurer que tous les champs sont présents
+      return { ...defaultConfig, ...config };
     } else {
-      return {
-        port: 10767,
-        fileFormat: 'text',
-        filePath: 'now_playing.txt',
-        fileTemplate: '{{ARTIST}} - {{SONG}}',
-      };
+      // Créer le fichier de configuration avec les valeurs par défaut
+      fs.writeFileSync(configPath, JSON.stringify(defaultConfig, null, 2));
+      return defaultConfig;
     }
   } catch (error) {
     console.error('Erreur lors de la lecture de la configuration:', error);
-    return {
-      port: 10767,
-      fileFormat: 'text',
-      filePath: 'now_playing.txt',
-      fileTemplate: '{{ARTIST}} - {{SONG}}',
-    };
+    return defaultConfig;
   }
 });
 

@@ -41,6 +41,20 @@
       font-weight: 500;
     }
 
+    /* Style pour la case à cocher */
+    label[for="separateFiles"] {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+    }
+
+    label[for="separateFiles"] input[type="checkbox"] {
+      width: auto;
+      margin: 0;
+      cursor: pointer;
+    }
+
     input, select {
       width: 100%;
       padding: 10px;
@@ -184,6 +198,35 @@
   </div>
 
   <div class="form-group">
+    <label for="separateFiles">
+      <input type="checkbox" id="separateFiles" />
+      Enregistrer dans des fichiers séparés
+    </label>
+  </div>
+
+  <div id="separateFilesContainer" style="display: none;">
+    <div class="form-group">
+      <label for="artistFilePath">Chemin du fichier Artiste</label>
+      <input type="text" id="artistFilePath" placeholder="C:\CiderWS\artist.txt" />
+    </div>
+
+    <div class="form-group">
+      <label for="songFilePath">Chemin du fichier Titre</label>
+      <input type="text" id="songFilePath" placeholder="C:\CiderWS\song.txt" />
+    </div>
+
+    <div class="form-group">
+      <label for="albumFilePath">Chemin du fichier Album</label>
+      <input type="text" id="albumFilePath" placeholder="C:\CiderWS\album.txt" />
+    </div>
+
+    <div class="form-group">
+      <label for="coverFilePath">Chemin du fichier Cover</label>
+      <input type="text" id="coverFilePath" placeholder="C:\CiderWS\cover.txt" />
+    </div>
+  </div>
+
+  <div class="form-group" id="singleFileContainer">
     <label for="filePath">Chemin du fichier</label>
     <input type="text" id="filePath" placeholder="now_playing.txt" />
     <div class="help-text">Chemin où sera sauvegardé le fichier</div>
