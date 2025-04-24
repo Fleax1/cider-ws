@@ -84,14 +84,8 @@ function connectToCider(port) {
 }
 
 function saveToFile(songInfo) {
-  const configPath = path.join(__dirname, 'settings.json');
+  const configPath = path.join(process.env.APPDATA, 'CiderWS', 'settings.json');
   const config = JSON.parse(fs.readFileSync(configPath, 'utf8'));
-  
-  // Créer le dossier C:\CiderWS s'il n'existe pas
-  const ciderWSPath = 'C:\\CiderWS';
-  if (!fs.existsSync(ciderWSPath)) {
-    fs.mkdirSync(ciderWSPath, { recursive: true });
-  }
   
   if (config.separateFiles) {
     // Sauvegarder dans des fichiers séparés
@@ -224,8 +218,28 @@ ipcMain.handle('get-current-song', () => {
   return currentSong;
 });
 
+// Fonction pour migrer la configuration vers une nouvelle version
+function migrateConfig(config, defaultConfig) {
+  const migratedConfig = { ...defaultConfig };
+  
+  // Copier les valeurs existantes
+  for (const key in config) {
+    if (key in defaultConfig) {
+      migratedConfig[key] = config[key];
+    }
+  }
+  
+  // Ajouter ici la logique de migration pour les versions futures
+  // Par exemple :
+  // if (!config.hasOwnProperty('newParameter')) {
+  //   migratedConfig.newParameter = defaultConfig.newParameter;
+  // }
+  
+  return migratedConfig;
+}
+
 ipcMain.handle('get-config', () => {
-  const configPath = path.join(__dirname, 'settings.json');
+  const configPath = path.join(process.env.APPDATA, 'CiderWS', 'settings.json');
   const defaultConfig = {
     port: 10767,
     fileFormat: 'text',
@@ -235,16 +249,31 @@ ipcMain.handle('get-config', () => {
     artistFilePath: 'C:\\CiderWS\\artist.txt',
     songFilePath: 'C:\\CiderWS\\song.txt',
     albumFilePath: 'C:\\CiderWS\\album.txt',
-    coverFilePath: 'C:\\CiderWS\\cover.txt'
+    coverFilePath: 'C:\\CiderWS\\cover.txt',
+    // Ajoutez ici les nouveaux paramètres pour les futures versions
+    // newParameter: 'defaultValue'
   };
 
   try {
+    // Créer le dossier s'il n'existe pas
+    const configDir = path.dirname(configPath);
+    if (!fs.existsSync(configDir)) {
+      fs.mkdirSync(configDir, { recursive: true });
+    }
+
     if (fs.existsSync(configPath)) {
       const configData = fs.readFileSync(configPath, 'utf8');
       const config = JSON.parse(configData);
       
-      // Fusionner avec la configuration par défaut pour s'assurer que tous les champs sont présents
-      return { ...defaultConfig, ...config };
+      // Migrer la configuration si nécessaire
+      const migratedConfig = migrateConfig(config, defaultConfig);
+      
+      // Sauvegarder la configuration migrée si des changements ont été effectués
+      if (JSON.stringify(config) !== JSON.stringify(migratedConfig)) {
+        fs.writeFileSync(configPath, JSON.stringify(migratedConfig, null, 2));
+      }
+      
+      return migratedConfig;
     } else {
       // Créer le fichier de configuration avec les valeurs par défaut
       fs.writeFileSync(configPath, JSON.stringify(defaultConfig, null, 2));
@@ -257,7 +286,14 @@ ipcMain.handle('get-config', () => {
 });
 
 ipcMain.handle('save-config', (event, config) => {
-  const configPath = path.join(__dirname, 'settings.json');
+  const configPath = path.join(process.env.APPDATA, 'CiderWS', 'settings.json');
+  
+  // Créer le dossier s'il n'existe pas
+  const configDir = path.dirname(configPath);
+  if (!fs.existsSync(configDir)) {
+    fs.mkdirSync(configDir, { recursive: true });
+  }
+  
   fs.writeFileSync(configPath, JSON.stringify(config, null, 2));
   
   // Redémarrer la connexion WebSocket avec la nouvelle configuration

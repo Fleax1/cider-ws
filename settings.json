@@ -3,5 +3,9 @@
   "fileFormat": "text",
   "separateFiles": false,
   "filePath": "C:\\CiderWS\\now_playing.txt",
-  "fileTemplate": "{{ARTIST}} - {{SONG}}"
+  "fileTemplate": "{{ARTIST}} - {{SONG}}",
+  "artistFilePath": "C:\\CiderWS\\artist.txt",
+  "songFilePath": "C:\\CiderWS\\song.txt",
+  "albumFilePath": "C:\\CiderWS\\album.txt",
+  "coverFilePath": "C:\\CiderWS\\cover.txt"
 }

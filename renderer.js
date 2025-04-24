@@ -54,10 +54,10 @@ window.addEventListener('DOMContentLoaded', () => {
       separateFilesContainer.style.display = 'block';
       singleFileContainer.style.display = 'none';
       document.querySelector('.form-group:has(#fileTemplate)').style.display = 'none';
-      document.getElementById('artistFilePath').value = config.artistFilePath || 'artist.txt';
-      document.getElementById('songFilePath').value = config.songFilePath || 'song.txt';
-      document.getElementById('albumFilePath').value = config.albumFilePath || 'album.txt';
-      document.getElementById('coverFilePath').value = config.coverFilePath || 'cover.txt';
+      document.getElementById('artistFilePath').value = config.artistFilePath;
+      document.getElementById('songFilePath').value = config.songFilePath;
+      document.getElementById('albumFilePath').value = config.albumFilePath;
+      document.getElementById('coverFilePath').value = config.coverFilePath;
     }
 
     separateFilesCheckbox.addEventListener('change', () => {
@@ -66,19 +66,11 @@ window.addEventListener('DOMContentLoaded', () => {
         singleFileContainer.style.display = 'none';
         document.querySelector('.form-group:has(#fileTemplate)').style.display = 'none';
         
-        // Remplir les champs avec les chemins par défaut s'ils sont vides
-        if (!document.getElementById('artistFilePath').value) {
-          document.getElementById('artistFilePath').value = 'C:\\CiderWS\\artist.txt';
-        }
-        if (!document.getElementById('songFilePath').value) {
-          document.getElementById('songFilePath').value = 'C:\\CiderWS\\song.txt';
-        }
-        if (!document.getElementById('albumFilePath').value) {
-          document.getElementById('albumFilePath').value = 'C:\\CiderWS\\album.txt';
-        }
-        if (!document.getElementById('coverFilePath').value) {
-          document.getElementById('coverFilePath').value = 'C:\\CiderWS\\cover.txt';
-        }
+        // Remplir les champs avec les chemins de la configuration
+        document.getElementById('artistFilePath').value = config.artistFilePath;
+        document.getElementById('songFilePath').value = config.songFilePath;
+        document.getElementById('albumFilePath').value = config.albumFilePath;
+        document.getElementById('coverFilePath').value = config.coverFilePath;
       } else {
         separateFilesContainer.style.display = 'none';
         singleFileContainer.style.display = 'block';
