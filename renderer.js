@@ -2,12 +2,14 @@ const { ipcRenderer } = require('electron');
 
 function showStatusMessage(message, type = 'success') {
   const statusElement = document.getElementById('statusMessage');
+  if (!statusElement) return;
+  
   statusElement.textContent = message;
   statusElement.className = `status-message ${type}`;
   statusElement.style.display = 'block';
   
-  // Masquer le message après 3 secondes
-  setTimeout(() => {
+  clearTimeout(statusElement.timeoutId);
+  statusElement.timeoutId = setTimeout(() => {
     statusElement.style.display = 'none';
   }, 3000);
 }
@@ -16,23 +18,25 @@ function updateNowPlaying(songInfo) {
   const currentSongElement = document.getElementById('currentSong');
   const albumCoverElement = document.querySelector('.album-cover');
   
+  if (!currentSongElement || !albumCoverElement) return;
+  
   if (!songInfo || !songInfo.artist || !songInfo.song) {
     currentSongElement.innerHTML = '<div class="no-song">Aucune musique en cours de lecture</div>';
     albumCoverElement.innerHTML = '<div class="no-cover">Aucune pochette</div>';
     return;
   }
 
+  const { artist, song, album, coverUrl } = songInfo;
+  
   currentSongElement.innerHTML = `
-    <div><span>Artiste :</span> ${songInfo.artist}</div>
-    <div><span>Titre :</span> ${songInfo.song}</div>
-    ${songInfo.album ? `<div><span>Album :</span> ${songInfo.album}</div>` : ''}
+    <div><span>Artiste :</span> ${artist}</div>
+    <div><span>Titre :</span> ${song}</div>
+    ${album ? `<div><span>Album :</span> ${album}</div>` : ''}
   `;
 
-  if (songInfo.coverUrl) {
-    albumCoverElement.innerHTML = `<img src="${songInfo.coverUrl}" alt="Pochette de ${songInfo.album || songInfo.song}">`;
-  } else {
-    albumCoverElement.innerHTML = '<div class="no-cover">Aucune pochette disponible</div>';
-  }
+  albumCoverElement.innerHTML = coverUrl 
+    ? `<img src="${coverUrl}" alt="Pochette de ${album || song}" loading="lazy">`
+    : '<div class="no-cover">Aucune pochette disponible</div>';
 }
 
 // Récupérer la configuration à partir du processus principal

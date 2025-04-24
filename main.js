@@ -12,23 +12,21 @@ let socket;
 function connectToCider(port) {
   console.log(`Tentative de connexion à Cider sur le port ${port}...`);
   
-  const socket = io(`http://127.0.0.1:${port}`, {
+  if (socket) {
+    socket.disconnect();
+  }
+
+  const socketOptions = {
     transports: ['websocket'],
     reconnection: true,
     reconnectionAttempts: Infinity,
     reconnectionDelay: 1000,
     timeout: 20000,
     forceNew: true,
-    autoConnect: true,
-    forceBase64: false,
-    extraHeaders: {},
-    path: '/socket.io/',
-    query: {},
-    agent: false,
-    onlyBinaryUpgrades: false,
-    forceNode: true,
-    localAddress: '127.0.0.1'
-  });
+    autoConnect: true
+  };
+
+  socket = io(`http://127.0.0.1:${port}`, socketOptions);
 
   socket.on('connect', () => {
     console.log('✅ Connecté à Cider via WebSocket');
@@ -39,48 +37,65 @@ function connectToCider(port) {
     console.error('❌ Erreur de connexion à Cider:', error.message);
   });
 
-  socket.on('API:Playback', (payload) => {
-    const { type, data } = payload;
-
-    if (type === 'playbackStatus.nowPlayingItemDidChange' || type === 'playbackStatus.getCurrentItem' || type === 'playbackStatus.playbackStateDidChange') {
-      if (data && (data.attributes || (data.artistName && data.name))) {
-        // Remplacer les variables de dimensions dans l'URL
-        let coverUrl = data.attributes?.artwork?.url || data.artwork?.url;
-        if (coverUrl) {
-          coverUrl = coverUrl.replace('{w}', '500').replace('{h}', '500');
-        }
-        
-        currentSong = {
-          artist: data.attributes?.artistName || data.artistName || 'Inconnu',
-          song: data.attributes?.name || data.name || 'Inconnu',
-          album: data.attributes?.albumName || data.albumName || 'Inconnu',
-          coverUrl: coverUrl || null
-        };
-
-        console.log('🎵 Musique en cours:', `${currentSong.artist} - ${currentSong.song}`);
-
-        if (mainWindow) {
-          mainWindow.webContents.send('now-playing-update', currentSong);
-        }
-
-        saveToFile(currentSong);
-      } else if (type === 'playbackStatus.playbackStateDidChange' && data.state === 'stopped') {
-        console.log('⏹️ Lecture arrêtée');
-        currentSong = null;
-        if (mainWindow) {
-          mainWindow.webContents.send('now-playing-update', null);
-        }
-      } else {
-        console.log('⏸️ Aucune musique en cours de lecture');
-        currentSong = null;
-        if (mainWindow) {
-          mainWindow.webContents.send('now-playing-update', null);
-        }
-      }
-    }
-  });
+  socket.on('API:Playback', handlePlaybackEvent);
 
   return socket;
+}
+
+function handlePlaybackEvent(payload) {
+  const { type, data } = payload;
+
+  if (!['playbackStatus.nowPlayingItemDidChange', 'playbackStatus.getCurrentItem', 'playbackStatus.playbackStateDidChange'].includes(type)) {
+    return;
+  }
+
+  if (data?.state === 'stopped') {
+    handleStoppedPlayback();
+    return;
+  }
+
+  if (!data?.attributes && !(data?.artistName && data?.name)) {
+    handleNoPlayback();
+    return;
+  }
+
+  handleCurrentSong(data);
+}
+
+function handleStoppedPlayback() {
+  console.log('⏹️ Lecture arrêtée');
+  currentSong = null;
+  if (mainWindow) {
+    mainWindow.webContents.send('now-playing-update', null);
+  }
+}
+
+function handleNoPlayback() {
+  console.log('⏸️ Aucune musique en cours de lecture');
+  currentSong = null;
+  if (mainWindow) {
+    mainWindow.webContents.send('now-playing-update', null);
+  }
+}
+
+function handleCurrentSong(data) {
+  const attributes = data.attributes || data;
+  const coverUrl = attributes.artwork?.url || attributes.artwork?.url;
+  
+  currentSong = {
+    artist: attributes.artistName || attributes.artistName || 'Inconnu',
+    song: attributes.name || attributes.name || 'Inconnu',
+    album: attributes.albumName || attributes.albumName || 'Inconnu',
+    coverUrl: coverUrl ? coverUrl.replace('{w}', '500').replace('{h}', '500') : null
+  };
+
+  console.log('🎵 Musique en cours:', `${currentSong.artist} - ${currentSong.song}`);
+
+  if (mainWindow) {
+    mainWindow.webContents.send('now-playing-update', currentSong);
+  }
+
+  saveToFile(currentSong);
 }
 
 function saveToFile(songInfo) {
