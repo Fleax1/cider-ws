@@ -53,6 +53,7 @@ window.addEventListener('DOMContentLoaded', () => {
       separateFilesCheckbox.checked = true;
       separateFilesContainer.style.display = 'block';
       singleFileContainer.style.display = 'none';
+      document.querySelector('.form-group:has(#fileTemplate)').style.display = 'none';
       document.getElementById('artistFilePath').value = config.artistFilePath || 'artist.txt';
       document.getElementById('songFilePath').value = config.songFilePath || 'song.txt';
       document.getElementById('albumFilePath').value = config.albumFilePath || 'album.txt';
@@ -63,6 +64,7 @@ window.addEventListener('DOMContentLoaded', () => {
       if (separateFilesCheckbox.checked) {
         separateFilesContainer.style.display = 'block';
         singleFileContainer.style.display = 'none';
+        document.querySelector('.form-group:has(#fileTemplate)').style.display = 'none';
         
         // Remplir les champs avec les chemins par défaut s'ils sont vides
         if (!document.getElementById('artistFilePath').value) {
@@ -80,6 +82,7 @@ window.addEventListener('DOMContentLoaded', () => {
       } else {
         separateFilesContainer.style.display = 'none';
         singleFileContainer.style.display = 'block';
+        document.querySelector('.form-group:has(#fileTemplate)').style.display = 'block';
       }
     });
   }).catch(error => {
