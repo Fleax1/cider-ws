@@ -47,6 +47,10 @@ window.addEventListener('DOMContentLoaded', () => {
     document.getElementById('fileFormat').value = config.fileFormat;
     document.getElementById('filePath').value = config.filePath;
     document.getElementById('fileTemplate').value = config.fileTemplate || '{{ARTIST}} - {{SONG}}';
+    document.getElementById('coverFormat').value = config.coverFormat || 'text';
+    
+    // Mettre à jour l'interface en fonction du format de cover
+    updateCoverFormatUI(config.coverFormat);
     
     // Gérer la case à cocher des fichiers séparés
     const separateFilesCheckbox = document.getElementById('separateFiles');
@@ -63,6 +67,11 @@ window.addEventListener('DOMContentLoaded', () => {
       document.getElementById('albumFilePath').value = config.albumFilePath;
       document.getElementById('coverFilePath').value = config.coverFilePath;
     }
+
+    // Écouter les changements de format de cover
+    document.getElementById('coverFormat').addEventListener('change', (e) => {
+      updateCoverFormatUI(e.target.value);
+    });
 
     separateFilesCheckbox.addEventListener('change', () => {
       if (separateFilesCheckbox.checked) {
@@ -101,13 +110,24 @@ window.addEventListener('DOMContentLoaded', () => {
       port: parseInt(port),
       fileFormat: document.getElementById('fileFormat').value,
       separateFiles: separateFiles,
+      coverFormat: document.getElementById('coverFormat').value
     };
 
     if (separateFiles) {
       config.artistFilePath = document.getElementById('artistFilePath').value;
       config.songFilePath = document.getElementById('songFilePath').value;
       config.albumFilePath = document.getElementById('albumFilePath').value;
-      config.coverFilePath = document.getElementById('coverFilePath').value;
+      config.coverFormat = document.getElementById('coverFormat').value;
+      
+      // Mettre à jour le chemin de la cover en fonction du format
+      const coverPath = document.getElementById('coverFilePath').value;
+      if (config.coverFormat === 'image' && coverPath.endsWith('.txt')) {
+        config.coverFilePath = coverPath.replace('.txt', '.jpg');
+      } else if (config.coverFormat === 'text' && coverPath.endsWith('.jpg')) {
+        config.coverFilePath = coverPath.replace('.jpg', '.txt');
+      } else {
+        config.coverFilePath = coverPath;
+      }
       
       if (!config.artistFilePath || !config.songFilePath || !config.albumFilePath || !config.coverFilePath) {
         showStatusMessage('Tous les chemins de fichiers sont requis', 'error');
@@ -151,3 +171,29 @@ window.addEventListener('DOMContentLoaded', () => {
     console.error('Erreur lors de la récupération de la musique en cours:', error);
   });
 });
+
+// Fonction pour mettre à jour l'interface en fonction du format de cover
+function updateCoverFormatUI(coverFormat) {
+  const coverPathInput = document.getElementById('coverFilePath');
+  const coverHelpText = document.getElementById('coverHelpText');
+  
+  if (coverFormat === 'image') {
+    coverPathInput.placeholder = 'C:\\CiderWS\\cover.jpg';
+    coverHelpText.textContent = 'Chemin où sera sauvegardée l\'image de la cover';
+    // Mettre à jour la valeur si elle correspond à l'ancien format
+    if (coverPathInput.value.endsWith('.txt')) {
+      coverPathInput.value = coverPathInput.value.replace('.txt', '.jpg');
+    } else if (!coverPathInput.value) {
+      coverPathInput.value = 'C:\\CiderWS\\cover.jpg';
+    }
+  } else {
+    coverPathInput.placeholder = 'C:\\CiderWS\\cover.txt';
+    coverHelpText.textContent = 'Chemin où sera sauvegardé le fichier contenant l\'URL de la cover';
+    // Mettre à jour la valeur si elle correspond à l'ancien format
+    if (coverPathInput.value.endsWith('.jpg')) {
+      coverPathInput.value = coverPathInput.value.replace('.jpg', '.txt');
+    } else if (!coverPathInput.value) {
+      coverPathInput.value = 'C:\\CiderWS\\cover.txt';
+    }
+  }
+}

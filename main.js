@@ -2,6 +2,7 @@ const { app, BrowserWindow, ipcMain, screen, Tray, Menu } = require('electron');
 const fs = require('fs');
 const path = require('path');
 const io = require('socket.io-client');
+const https = require('https');
 
 let mainWindow;
 let tray = null;
@@ -98,6 +99,35 @@ function handleCurrentSong(data) {
   saveToFile(currentSong);
 }
 
+async function downloadAndSaveCover(coverUrl, filePath) {
+  if (!coverUrl) return;
+
+  return new Promise((resolve, reject) => {
+    https.get(coverUrl, (response) => {
+      if (response.statusCode !== 200) {
+        reject(new Error(`Erreur lors du téléchargement de l'image: ${response.statusCode}`));
+        return;
+      }
+
+      const chunks = [];
+      response.on('data', (chunk) => chunks.push(chunk));
+      response.on('end', () => {
+        const buffer = Buffer.concat(chunks);
+        const dirPath = path.dirname(filePath);
+        
+        if (!fs.existsSync(dirPath)) {
+          fs.mkdirSync(dirPath, { recursive: true });
+        }
+
+        fs.writeFile(filePath, buffer, (err) => {
+          if (err) reject(err);
+          else resolve();
+        });
+      });
+    }).on('error', reject);
+  });
+}
+
 function saveToFile(songInfo) {
   const configPath = path.join(process.env.APPDATA, 'CiderWS', 'settings.json');
   const config = JSON.parse(fs.readFileSync(configPath, 'utf8'));
@@ -107,9 +137,18 @@ function saveToFile(songInfo) {
     const files = [
       { path: config.artistFilePath, content: songInfo.artist },
       { path: config.songFilePath, content: songInfo.song },
-      { path: config.albumFilePath, content: songInfo.album },
-      { path: config.coverFilePath, content: songInfo.coverUrl || '' }
+      { path: config.albumFilePath, content: songInfo.album }
     ];
+
+    // Gérer la cover selon le format choisi
+    if (config.coverFormat === 'image' && songInfo.coverUrl) {
+      const coverPath = config.coverFilePath.endsWith('.jpg') ? config.coverFilePath : config.coverFilePath.replace('.txt', '.jpg');
+      downloadAndSaveCover(songInfo.coverUrl, coverPath)
+        .catch(error => console.error('Erreur lors de la sauvegarde de l\'image:', error));
+    } else if (config.coverFormat === 'text') {
+      const coverPath = config.coverFilePath.endsWith('.txt') ? config.coverFilePath : config.coverFilePath.replace('.jpg', '.txt');
+      files.push({ path: coverPath, content: songInfo.coverUrl || '' });
+    }
 
     files.forEach(({ path: filePath, content }) => {
       // Remplacer %APPDATA% par le chemin réel
@@ -149,6 +188,13 @@ function saveToFile(songInfo) {
     }
 
     fs.writeFileSync(filePath, output);
+
+    // Si le format de cover est image, sauvegarder l'image séparément
+    if (config.coverFormat === 'image' && songInfo.coverUrl) {
+      const coverPath = path.join(path.dirname(filePath), 'cover.jpg');
+      downloadAndSaveCover(songInfo.coverUrl, coverPath)
+        .catch(error => console.error('Erreur lors de la sauvegarde de l\'image:', error));
+    }
   }
 }
 
@@ -265,8 +311,7 @@ ipcMain.handle('get-config', () => {
     songFilePath: 'C:\\CiderWS\\song.txt',
     albumFilePath: 'C:\\CiderWS\\album.txt',
     coverFilePath: 'C:\\CiderWS\\cover.txt',
-    // Ajoutez ici les nouveaux paramètres pour les futures versions
-    // newParameter: 'defaultValue'
+    coverFormat: 'text'
   };
 
   try {

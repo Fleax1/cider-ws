@@ -7,5 +7,6 @@
   "artistFilePath": "C:\\CiderWS\\artist.txt",
   "songFilePath": "C:\\CiderWS\\song.txt",
   "albumFilePath": "C:\\CiderWS\\album.txt",
-  "coverFilePath": "C:\\CiderWS\\cover.txt"
+  "coverFilePath": "C:\\CiderWS\\cover.txt",
+  "coverFormat": "text"
 }

@@ -198,6 +198,15 @@
   </div>
 
   <div class="form-group">
+    <label for="coverFormat">Format de la cover</label>
+    <select id="coverFormat">
+      <option value="text">Texte (URL)</option>
+      <option value="image">Image (JPG)</option>
+    </select>
+    <div class="help-text">Choisissez si la cover doit être sauvegardée en tant que fichier texte avec l'URL ou en tant qu'image JPG</div>
+  </div>
+
+  <div class="form-group">
     <label for="separateFiles">
       <input type="checkbox" id="separateFiles" />
       Enregistrer dans des fichiers séparés
@@ -220,9 +229,10 @@
       <input type="text" id="albumFilePath" placeholder="C:\CiderWS\album.txt" />
     </div>
 
-    <div class="form-group">
+    <div class="form-group" id="coverPathContainer">
       <label for="coverFilePath">Chemin du fichier Cover</label>
       <input type="text" id="coverFilePath" placeholder="C:\CiderWS\cover.txt" />
+      <div class="help-text" id="coverHelpText">Chemin où sera sauvegardé le fichier contenant l'URL de la cover</div>
     </div>
   </div>
 
